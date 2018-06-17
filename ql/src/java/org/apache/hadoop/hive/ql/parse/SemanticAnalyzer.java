@@ -12847,7 +12847,7 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
         }
       }
     }
-    boolean makeInsertOnly = HiveConf.getBoolVar(conf, ConfVars.HIVE_CREATE_TABLES_AS_INSERT_ONLY);
+    boolean makeInsertOnly = !isTemporaryTable && HiveConf.getBoolVar(conf, ConfVars.HIVE_CREATE_TABLES_AS_INSERT_ONLY);
     boolean makeAcid = !isTemporaryTable &&
         MetastoreConf.getBoolVar(conf, MetastoreConf.ConfVars.CREATE_TABLES_AS_ACID) &&
         HiveConf.getBoolVar(conf, ConfVars.HIVE_SUPPORT_CONCURRENCY) &&
@@ -12887,6 +12887,9 @@ public class SemanticAnalyzer extends BaseSemanticAnalyzer {
             TransactionalValidationListener.DEFAULT_TRANSACTIONAL_PROPERTY);
         LOG.info("Automatically chose to make " + qualifiedTableName + " acid.");
       }
+    }
+    if (isTemporaryTable) {
+      AcidUtils.setNonTransactional(retValue);
     }
     return retValue;
   }
